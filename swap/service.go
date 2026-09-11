@@ -549,7 +549,7 @@ func (s *SwapService) estimateMaximumSwapAmountSat(chain string) (uint64, error)
 
 // OnSwapInRequestReceived creates a new swap-in process and sends the event to the swap statemachine
 func (s *SwapService) OnSwapInRequestReceived(swapId *SwapId, peerId string, message *SwapInRequestMessage) error {
-	if message.Network != "" || message.Asset != "" {
+	if message.Network == "" || message.Asset != "" {
 		return s.rejectNewLiquidSwap(swapId, peerId)
 	}
 	var (
@@ -571,7 +571,7 @@ func (s *SwapService) OnSwapInRequestReceived(swapId *SwapId, peerId string, mes
 		}
 	}
 
-	if premiumValue >= message.PremiumLimit {
+	if premiumValue > message.PremiumLimit {
 		err := fmt.Errorf("unacceptable premium: %d, limit: %d", premiumValue, message.PremiumLimit)
 		msg := fmt.Sprintf("from the %s peer: %s", s.swapServices.lightning.Implementation(), err.Error())
 		// We want to tell our peer why we can not do this swap.
@@ -607,7 +607,7 @@ func (s *SwapService) OnSwapInRequestReceived(swapId *SwapId, peerId string, mes
 		return err
 	}
 
-	if sp < message.Amount {
+	if sp < message.Amount*1000 {
 		err = fmt.Errorf("exceeding spendable amount_msat: %d", sp)
 		msg := fmt.Sprintf("from the %s peer: %s", s.swapServices.lightning.Implementation(), err.Error())
 		// We want to tell our peer why we can not do this swap.
@@ -655,7 +655,7 @@ func (s *SwapService) OnSwapInRequestReceived(swapId *SwapId, peerId string, mes
 	}
 
 	done, err := swap.SendEvent(Event_SwapInReceiver_OnRequestReceived, message)
-	if !done {
+	if done {
 		s.RemoveActiveSwap(swap.SwapId.String())
 	}
 	return err
