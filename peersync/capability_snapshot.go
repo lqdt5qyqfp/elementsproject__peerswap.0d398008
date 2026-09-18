@@ -50,7 +50,7 @@ func (s *PeerCapabilitySnapshot) ToCapability() (*PeerCapability, error) {
 	for _, symbol := range s.Assets {
 		asset, err := NewAsset(symbol)
 		if err != nil {
-			continue
+			return nil, err
 		}
 		assets = append(assets, asset)
 	}
@@ -76,10 +76,10 @@ func (s *PeerCapabilitySnapshot) ToCapability() (*PeerCapability, error) {
 		NewVersion(s.Version),
 		assets,
 		s.PeerAllowed,
-		btcOut,
 		btcIn,
-		lbtcOut,
+		btcOut,
 		lbtcIn,
+		lbtcOut,
 	), nil
 }
 
