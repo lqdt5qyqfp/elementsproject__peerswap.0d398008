@@ -333,12 +333,12 @@ func buildDirectClaimPaymentRequest(
 	if decoded.GetDestination() != channel.RemotePubkey {
 		return nil, fmt.Errorf("destination pubkey in invoice does not match remote pubkey of channel. \n\t\tdestination pubkey in invoice: %s, remote pubkey of channel: %s ", decoded.GetDestination(), channel.RemotePubkey)
 	}
-	cltvLimit := int32(decoded.GetCltvExpiry() + int64(routing.BlockPadding))
+	cltvLimit := int32(decoded.GetCltvExpiry() + int64(routing.BlockPadding) + 1)
 	if maxTotalCLTVDelta != 0 {
 		if decoded.GetCltvExpiry() < 0 {
 			return nil, fmt.Errorf("invalid invoice CLTV delta: %d", decoded.GetCltvExpiry())
 		}
-		requiredCLTVDelta64 := uint64(decoded.GetCltvExpiry()) - // #nosec G115 -- negative values rejected above.
+		requiredCLTVDelta64 := uint64(decoded.GetCltvExpiry()) + // #nosec G115 -- negative values rejected above.
 			uint64(routing.BlockPadding)
 		if requiredCLTVDelta64 > math.MaxUint32 {
 			return nil, fmt.Errorf("invoice CLTV delta is too large: %d", requiredCLTVDelta64)
@@ -350,7 +350,7 @@ func buildDirectClaimPaymentRequest(
 		if maxTotalCLTVDelta >= math.MaxInt32 {
 			return nil, errors.New("payment CLTV limit is too large")
 		}
-		cltvLimit = int32(maxTotalCLTVDelta)
+		cltvLimit = int32(maxTotalCLTVDelta + 1) // #nosec G115 -- bounded above.
 	}
 	return &routerrpc.SendPaymentRequest{
 		PaymentRequest:  payreq,
