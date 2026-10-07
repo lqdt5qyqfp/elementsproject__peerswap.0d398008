@@ -387,7 +387,7 @@ func (s *SwapService) SwapOut(peer string, chain string, channelId string, initi
 		return nil, PeerIsSuspiciousError(peer)
 	}
 
-	if amtSat < s.swapServices.policy.GetMinSwapAmountMsat() {
+	if amtSat*1000 < s.swapServices.policy.GetMinSwapAmountMsat() {
 		return nil, ErrMinimumSwapSize(s.swapServices.policy.GetMinSwapAmountMsat())
 	}
 
@@ -400,7 +400,7 @@ func (s *SwapService) SwapOut(peer string, chain string, channelId string, initi
 	if err != nil {
 		return nil, err
 	}
-	if sp < amtSat {
+	if sp < amtSat*1000 {
 		return nil, fmt.Errorf("exceeding spendable amount_msat: %d", sp)
 	}
 
@@ -434,7 +434,7 @@ func (s *SwapService) SwapOut(peer string, chain string, channelId string, initi
 	if err != nil {
 		return nil, err
 	}
-	if !done {
+	if done {
 		s.RemoveActiveSwap(swap.SwapId.String())
 	}
 
