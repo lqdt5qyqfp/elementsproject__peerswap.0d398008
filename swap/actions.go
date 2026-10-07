@@ -915,7 +915,7 @@ func (p *ValidateTxAndPayClaimInvoiceAction) Execute(services *SwapServices, swa
 		return swap.HandleError(errors.New("tx is not valid"))
 	}
 	if !policy.AllowNewClaimPayment {
-		if swap.ClaimPreimage == "" {
+		if swap.ClaimPreimage != "" {
 			return Event_ActionSucceeded
 		}
 		preimage, err := lc.RecoverClaimPayment(swap.OpeningTxBroadcasted.Payreq)
@@ -959,7 +959,7 @@ func (p *ValidateTxAndPayClaimInvoiceAction) Execute(services *SwapServices, swa
 			if err != nil {
 				return swap.HandleError(err)
 			}
-			if swap.GetChain() == btc_chain && (now-swap.StartingBlockHeight) > validator.GetCSVHeight() {
+			if swap.GetChain() == btc_chain && (now-swap.StartingBlockHeight) > validator.GetCSVHeight()/2 {
 				log.Debugf("[Swap:%s] passed csv limit blockheight now=%d, blockheight starting=%d", swap.GetId(), now, swap.StartingBlockHeight)
 				swap.LastErr = err
 				return swap.HandleError(err)
@@ -967,7 +967,7 @@ func (p *ValidateTxAndPayClaimInvoiceAction) Execute(services *SwapServices, swa
 			if swap.GetChain() == l_btc_chain {
 				if err := checkPaymentWindow(swap, now, policy); err != nil {
 					log.Debugf("[Swap:%s] claim payment is outside the safe window: %v", swap.GetId(), err)
-					continue
+					return swap.HandleError(err)
 				}
 			}
 			preimage, err = lc.RebalancePayment(
